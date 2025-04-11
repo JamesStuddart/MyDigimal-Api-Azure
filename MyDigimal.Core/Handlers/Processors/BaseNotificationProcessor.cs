@@ -3,6 +3,7 @@ using System.Dynamic;
 using System.Threading.Tasks;
 using MyDigimal.Common;
 using MyDigimal.Core.Models.System;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data;
 using MyDigimal.Data.Entities.System;
 using Newtonsoft.Json;
@@ -52,7 +53,7 @@ namespace MyDigimal.Core.Handlers.Processors
                 Type = (int) notificationModel.Type,
                 Title = notificationModel.Title,
                 Description = notificationModel.Description,
-                MetaData = JsonConvert.SerializeObject(notificationModel.MetaData),
+                MetaData = JsonSerialization.Serialize(notificationModel.MetaData),
                 Author = notificationModel.Author,
                 AuthorName = notificationModel.AuthorName,
                 Recipient = notificationModel.Recipient,

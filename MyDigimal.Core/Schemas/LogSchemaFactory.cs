@@ -13,16 +13,16 @@ namespace MyDigimal.Core.Schemas
 {
     public class LogSchemaFactory(IUnitOfWork unitOfWork, ILogEntryProvider logEntryProvider) : ILogSchemaFactory
     {
-        public async Task<LogSchemaModel> BuildSchema(Guid id, Guid userId, bool includePublic = true, Guid? creatureId = null)
+        public async Task<LogSchemaModel> BuildSchema(Guid logSchemaId, Guid userId, bool includePublic = true, Guid? creatureId = null)
         {
-            var schema = await unitOfWork.LogSchemas.GetByIdAsync(id, userId, includePublic);
+            var schema = await unitOfWork.LogSchemas.GetByIdAsync(logSchemaId, userId, includePublic);
 
             if (schema == null)
             {
                 throw new Exception("Unable to locate schema");
             }
             
-            var parentEntries = (await unitOfWork.LogSchemaEntries.GetBySchemaIdAsync(id)).ToList();
+            var parentEntries = (await unitOfWork.LogSchemaEntries.GetBySchemaIdAsync(logSchemaId)).ToList();
 
             var parentId = parentEntries.Where(x=> x.ParentId == null).Select(x => x.Id);
             

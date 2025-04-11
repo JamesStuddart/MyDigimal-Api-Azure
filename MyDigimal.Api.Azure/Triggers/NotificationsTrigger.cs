@@ -8,8 +8,8 @@ using MyDigimal.Api.Azure.Models;
 using MyDigimal.Common;
 using MyDigimal.Core.Authentication.Models;
 using MyDigimal.Core.Handlers;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data;
-using Newtonsoft.Json;
 
 namespace MyDigimal.Api.Azure.Triggers;
 
@@ -24,7 +24,7 @@ public class NotificationsTrigger(
 {
     [Function("GetUserNotifications")]
     public async Task<HttpResponseData> GetUserNotifications(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "notifications")]
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "notification")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -33,15 +33,15 @@ public class NotificationsTrigger(
             var notifications = await notificationHandler.GetNotificationsByUserIdAsync(userId);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(
-                JsonConvert.SerializeObject(notifications.OrderByDescending(x => x.Created)));
+            await response.WriteAsJsonAsync(
+                notifications.OrderByDescending(x => x.Created));
             return response;
         });
     }
 
     [Function("MarkNotificationAsRead")]
     public async Task<HttpResponseData> MarkNotificationAsRead(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "notifications/{id}")]
+        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "notification/{id}")]
         HttpRequestData req, Guid id)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -63,7 +63,7 @@ public class NotificationsTrigger(
 
     [Function("ProcessNotification")]
     public async Task<HttpResponseData> ProcessNotification(
-        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "notifications/{id}/{processType}")]
+        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "notification/{id}/{processType}")]
         HttpRequestData req, Guid id, string processType)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Core.Authentication.Models;
 using MyDigimal.Core.LogEntries;
+using MyDigimal.Core.Serialization;
 using Newtonsoft.Json;
 
 namespace MyDigimal.Api.Azure.Triggers;
@@ -47,7 +48,7 @@ public class ReportingTrigger(
             await unitOfWork.AbortAsync();
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(report.OrderByDescending(x => x.NextFeedDate)));
+            await response.WriteAsJsonAsync(report.OrderByDescending(x => x.NextFeedDate));
             return response;
         });
     }

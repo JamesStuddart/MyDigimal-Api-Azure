@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Api.Azure.Models.Authentication;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data.Entities;
 using Newtonsoft.Json;
 
@@ -79,7 +80,7 @@ namespace MyDigimal.Api.Azure.Triggers
 
             var response = req.CreateResponse(HttpStatusCode.Created);
             response.Headers.Add("Location", $"{req.Url}/{user.Id}");
-            await response.WriteStringAsync(user.Id.ToString());
+            await response.WriteAsJsonAsync(user.Id.ToString());
             return response;
         }
 
@@ -119,7 +120,7 @@ namespace MyDigimal.Api.Azure.Triggers
                     };
 
                     var response = req.CreateResponse(HttpStatusCode.OK);
-                    await response.WriteStringAsync(JsonConvert.SerializeObject(userDetails));
+                    await response.WriteAsJsonAsync(userDetails);
                     return response;
                 }
                 catch (Exception ex)

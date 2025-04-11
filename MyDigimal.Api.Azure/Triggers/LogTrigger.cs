@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Core.Authentication.Models;
 using MyDigimal.Core.LogEntries;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data.Entities.CreatureLogs;
 using Newtonsoft.Json;
 
@@ -210,15 +211,15 @@ public class LogTrigger(
             if (creature == null || creature.Owner != userId)
                 return req.CreateResponse(HttpStatusCode.NotFound);
 
-            var from = new DateTime(fromYear, 1, 1);
-            var to = new DateTime(toYear, 1, 1);
+            var from = new DateTime(fromYear, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var to = new DateTime(toYear, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             var logs = await unitOfWork.LogEntries.GetExtendedByCreatureIdAsync(creatureId, from, to, entryId);
             var years = await unitOfWork.LogEntries.GetDistinctYearsForExtendedByCreatureIdAsync(creatureId, entryId);
 
             var result = logEntryProvider.MapLogsToReturnModel(userId, logs, years);
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(result));
+            await response.WriteAsJsonAsync(result);
             return response;
         }
         catch (Exception ex)
@@ -233,15 +234,15 @@ public class LogTrigger(
     {
         try
         {
-            var from = new DateTime(fromYear, 1, 1);
-            var to = new DateTime(toYear, 1, 1);
+            var from = new DateTime(fromYear, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var to = new DateTime(toYear, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             var logs = await unitOfWork.LogEntries.GetExtendedByUserIdAsync(userId, from, to, entryId);
             var years = await unitOfWork.LogEntries.GetDistinctYearsForExtendedByUserIdAsync(userId, entryId);
 
             var result = logEntryProvider.MapLogsToReturnModel(userId, logs, years);
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(result));
+            await response.WriteAsJsonAsync(result);
             return response;
         }
         catch (Exception ex)

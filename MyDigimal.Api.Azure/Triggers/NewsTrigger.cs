@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Core.Authentication.Models;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data.Entities.System;
 using Newtonsoft.Json;
 
@@ -28,7 +29,7 @@ public class NewsTrigger (IConfiguration configuration,
             await unitOfWork.AbortAsync();
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(news.OrderByDescending(x => x.Created)));
+            await response.WriteAsJsonAsync(news.OrderByDescending(x => x.Created));
             return response;
         }
 
@@ -49,7 +50,7 @@ public class NewsTrigger (IConfiguration configuration,
 
                 var response = req.CreateResponse(HttpStatusCode.Created);
                 response.Headers.Add("Location", $"{req.Url}{result.Id}");
-                await response.WriteStringAsync(JsonConvert.SerializeObject(new { result.Id }));
+                await response.WriteAsJsonAsync(new { result.Id });
                 return response;
             });
         }

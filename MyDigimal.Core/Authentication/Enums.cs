@@ -11,6 +11,8 @@ namespace MyDigimal.Core.Authentication
         Instagram,
         [Description("accounts.google.com")]
         Google,
+        [Description("apple")]
+        Apple,
         [Description("")]
         Twitter,
         [Description("")]

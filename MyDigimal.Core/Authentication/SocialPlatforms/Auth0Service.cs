@@ -1,8 +1,5 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -10,7 +7,6 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MyDigimal.Core.Authentication.Models;
-using Newtonsoft.Json;
 
 namespace MyDigimal.Core.Authentication.SocialPlatforms
 {
@@ -50,7 +46,8 @@ namespace MyDigimal.Core.Authentication.SocialPlatforms
                 };
 
                 var handler = new JwtSecurityTokenHandler();
-                var user = handler.ValidateToken(token.RawData, validationParameters, out var validatedToken);
+                
+                handler.ValidateToken(token.RawData, validationParameters, out var _);
 
                 return true;
             }

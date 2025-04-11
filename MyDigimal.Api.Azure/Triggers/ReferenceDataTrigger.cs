@@ -8,6 +8,7 @@ using MyDigimal.Api.Azure.Models;
 using MyDigimal.Common;
 using MyDigimal.Common.Extensions;
 using MyDigimal.Core.Authentication.Models;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data;
 using Newtonsoft.Json;
 
@@ -36,7 +37,7 @@ public class ReferenceDataTrigger (
             };
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(model));
+            await response.WriteAsJsonAsync(model);
             return response;
         });
     }
@@ -50,7 +51,7 @@ public class ReferenceDataTrigger (
             var model = AppSettings.AvailableLoginTypes.ToDescriptiveList();
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(model));
+            await response.WriteAsJsonAsync(model);
             return response;
         });
     }

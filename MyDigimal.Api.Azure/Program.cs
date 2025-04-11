@@ -1,10 +1,10 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyDigimal.Api.Azure;
-using MyDigimal.Api.Azure.Middleware;
-using MyDigimal.Api.Azure.Models;
 using MyDigimal.Common;
 using MyDigimal.Core;
 using MyDigimal.Data;
@@ -21,11 +21,16 @@ hostBuilder
     .ConfigureFunctionsWorkerDefaults(x =>
     {
         x.RegisterConfiguration();
+        
     })
     .ConfigureServices((context, services) =>
     {
         var env = context.HostingEnvironment;
-        
+        services.Configure<JsonSerializerOptions>(options =>
+        {
+            options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        });
         services.AddCors(options =>
         {
             if (env.IsDevelopment())

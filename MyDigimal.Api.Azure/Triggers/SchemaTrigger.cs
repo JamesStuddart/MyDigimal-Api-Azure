@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Core.Authentication.Models;
 using MyDigimal.Core.Schemas;
+using MyDigimal.Core.Serialization;
 using Newtonsoft.Json;
 
 
@@ -31,13 +32,13 @@ public class SchemaTrigger(
         {
             var userId = await GetUserId(req);
             var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-            var includePublic = bool.TryParse(query["includePublic"], out var result) && result;
+            var includePublic = !bool.TryParse(query["includePublic"], out var result) || result;
 
             var schemas = await unitOfWork.LogSchemas.GetAsync(userId, includePublic);
             await unitOfWork.AbortAsync();
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(schemas));
+            await response.WriteAsJsonAsync(schemas);
             return response;
         });
     }
@@ -57,14 +58,14 @@ public class SchemaTrigger(
 
             var userId = await GetUserId(req);
             var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-            var includePublic = bool.TryParse(query["includePublic"], out var result) && result;
+            var includePublic = !bool.TryParse(query["includePublic"], out var result) || result;
 
             var schema = await logSchemaFactory.BuildSchema(id, userId, includePublic);
             if (schema == null)
                 return req.CreateResponse(HttpStatusCode.NotFound);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(schema));
+            await response.WriteAsJsonAsync(schema);
             return response;
         });
     }
@@ -84,14 +85,47 @@ public class SchemaTrigger(
 
             var userId = await GetUserId(req);
             var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-            var includePublic = bool.TryParse(query["includePublic"], out var result) && result;
+            var includePublic = !bool.TryParse(query["includePublic"], out var result) || result;
 
             var schema = await logSchemaFactory.BuildSchema(id, userId, includePublic, creatureId);
             if (schema == null)
                 return req.CreateResponse(HttpStatusCode.NotFound);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(schema));
+            await response.WriteAsJsonAsync(schema);
+            return response;
+        });
+    }
+    
+    [Function("GetSchemaByCreatureId")]
+    public async Task<HttpResponseData> GetSchemaByCreatureId(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature/{creatureId}/schema")]
+        HttpRequestData req, Guid creatureId)
+    {
+        return await ValidateUserRequestAsync<object>(req, async _ =>
+        {
+            if (creatureId == Guid.Empty)
+            {
+                logger.LogInformation("Invalid creature ID");
+                return req.CreateResponse(HttpStatusCode.BadRequest);
+            }
+
+            var userId = await GetUserId(req);
+            var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
+            var includePublic = !bool.TryParse(query["includePublic"], out var result) || result;
+
+            var creature = await unitOfWork.Creatures.GetByIdAsync(creatureId, userId, includeArchived: false);
+            await unitOfWork.AbortAsync();
+
+            if (creature == null)
+                return req.CreateResponse(HttpStatusCode.NotFound);
+            
+            var schema = await logSchemaFactory.BuildSchema(creature.LogSchemaId, userId, includePublic, creatureId);
+            if (schema == null)
+                return req.CreateResponse(HttpStatusCode.NotFound);
+
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(schema);
             return response;
         });
     }
@@ -111,7 +145,7 @@ public class SchemaTrigger(
 
             var userId = await GetUserId(req);
             var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
-            var includePublic = bool.TryParse(query["includePublic"], out var result) && result;
+            var includePublic = !bool.TryParse(query["includePublic"], out var result) || result;
 
             var schema = await unitOfWork.LogSchemas.GetByIdAsync(id, userId, includePublic);
             await unitOfWork.AbortAsync();
@@ -120,11 +154,11 @@ public class SchemaTrigger(
                 return req.CreateResponse(HttpStatusCode.NotFound);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(new
+            await response.WriteAsJsonAsync(new
             {
                 Genes = JsonConvert.DeserializeObject<IEnumerable<Gene>>(schema.Genes),
                 Morphs = JsonConvert.DeserializeObject<IEnumerable<Morph>>(schema.Morphs)
-            }));
+            });
 
             return response;
         });

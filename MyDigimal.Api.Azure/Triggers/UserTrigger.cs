@@ -9,6 +9,7 @@ using MyDigimal.Api.Azure.Models;
 using MyDigimal.Common;
 using MyDigimal.Common.Extensions;
 using MyDigimal.Core.Authentication.Models;
+using MyDigimal.Core.Serialization;
 using MyDigimal.Data;
 using Newtonsoft.Json;
 
@@ -47,7 +48,7 @@ public class UserTrigger(
             });
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(responseModel));
+            await response.WriteAsJsonAsync(responseModel);
             return response;
         });
     }

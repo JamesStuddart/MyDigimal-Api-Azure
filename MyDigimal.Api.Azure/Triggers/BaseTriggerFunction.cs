@@ -2,9 +2,7 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
 using MyDigimal.Data.Entities;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
@@ -19,13 +17,15 @@ using MyDigimal.Common.Extensions;
 using MyDigimal.Core.Authentication;
 using MyDigimal.Core.Authentication.Models;
 using MyDigimal.Data;
+using Newtonsoft.Json;
+using HttpRequestData = Microsoft.Azure.Functions.Worker.Http.HttpRequestData;
 
 namespace MyDigimal.Api.Azure.Triggers;
 
 public abstract class BaseTriggerFunction(
     IConfiguration configuration,
     IUnitOfWork unitOfWork,
-    ILogger Logger,
+    ILogger logger,
     IOptions<AppSettings> appSettings,
     IOptions<Auth0Settings> auth0Settings)
 {
@@ -77,26 +77,7 @@ public abstract class BaseTriggerFunction(
         };
 
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
-        //
-        //         
-        // var validatedToken = new ValidatedToken();
-        // var jwtToken = token != null ? token.Replace("Bearer ", string.Empty) : null;
-        //         
-        // var handler = new JwtSecurityTokenHandler();
-        //     `
-        // if (!string.IsNullOrWhiteSpace(jwtToken) && handler.CanReadToken(jwtToken))
-        // {
-        //     var decodedToken = handler.ReadJwtToken(jwtToken);
-        //
-        //     if (!string.IsNullOrWhiteSpace(decodedToken.Issuer))
-        //     {
-        //         validatedToken.Platform = Enum<SocialPlatform>.GetByDescription(decodedToken.Issuer, SocialPlatform.Undefined);
-        //         validatedToken.Token = jwtToken;
-        //         validatedToken.DecodedToken = decodedToken;
-        //         validatedToken.IsValid = true;
-        //     }
-        // }
-        //
+
         if (validatedToken == null)
         {
             return null;
@@ -174,9 +155,9 @@ public abstract class BaseTriggerFunction(
         try
         {
             var principal = await ValidateTokenAsync(token);
-            var userRole = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userRole = (AccountRoleType)int.Parse(principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "-1000");
 
-            if (userRole != ((int)requiredRole).ToString())
+            if (userRole < requiredRole)
             {
                 response.StatusCode = HttpStatusCode.Forbidden;
                 return false;
@@ -193,15 +174,44 @@ public abstract class BaseTriggerFunction(
 
     private async Task<TRequest> DeserializeRequestAsync<TRequest>(HttpRequestData request) where TRequest : class
     {
-        var requestModel = await request.ReadFromJsonAsync<TRequest>();
-
-        if (requestModel == null)
+        if (request.Method.Equals("GET", StringComparison.OrdinalIgnoreCase) ||
+            request.Method.Equals("DELETE", StringComparison.OrdinalIgnoreCase))
         {
-            Logger.LogCritical("EmptyRequest");
-            throw new ArgumentNullException(nameof(requestModel), "Request body is empty.");
+            return null;
         }
 
-        return requestModel;
+        if (request.Body == null || request.Body.CanRead == false)
+        {
+            return null;
+        }
+
+        using var reader = new StreamReader(request.Body);
+        var body = await reader.ReadToEndAsync();
+
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonConvert.DeserializeObject<TRequest>(body);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Failed to deserialize request body to {RequestType}", typeof(TRequest).Name);
+            return null;
+        }
+        
+        // var requestModel = await request.ReadFromJsonAsync<TRequest>();
+        //
+        // if (requestModel == null)
+        // {
+        //     logger.LogCritical("EmptyRequest");
+        //     throw new ArgumentNullException(nameof(requestModel), "Request body is empty.");
+        // }
+        //
+        // return requestModel;
     }
 
     private HttpResponseData HandleException(Exception ex, HttpResponseData response)
@@ -209,23 +219,23 @@ public abstract class BaseTriggerFunction(
         switch (ex)
         {
             case KeyNotFoundException _:
-                Logger.LogWarning(ex, ex.Message ?? "No exception mesage found.");
+                logger.LogWarning(ex, ex.Message ?? "No exception mesage found.");
                 response.StatusCode = HttpStatusCode.NoContent;
                 break;
             case UnauthorizedAccessException _:
-                Logger.LogWarning(ex, ex.Message ?? "No exception mesage found.");
+                logger.LogWarning(ex, ex.Message ?? "No exception mesage found.");
                 response.StatusCode = HttpStatusCode.Forbidden;
                 break;
             case ConstraintException _:
-                Logger.LogWarning(ex, ex.Message ?? "No exception mesage found.");
+                logger.LogWarning(ex, ex.Message ?? "No exception mesage found.");
                 response.StatusCode = HttpStatusCode.Conflict;
                 break;
             default:
-                Logger.LogCritical(ex, ex.Message ?? "No exception mesage found.");
+                logger.LogCritical(ex, ex.Message ?? "No exception mesage found.");
                 while (ex.InnerException != null)
                 {
                     ex = ex.InnerException;
-                    Logger.LogCritical(ex, ex.Message ?? "No exception mesage found.");
+                    logger.LogCritical(ex, ex.Message ?? "No exception mesage found.");
                 }
 
                 response.StatusCode = HttpStatusCode.BadRequest;

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Core.Authentication.Models;
+using MyDigimal.Core.Serialization;
 using Newtonsoft.Json;
 
 
@@ -38,7 +39,7 @@ public class TagsTrigger (
                 .OrderBy(t => t);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteStringAsync(JsonConvert.SerializeObject(new { tags = tags ?? Enumerable.Empty<string>() }));
+            await response.WriteAsJsonAsync(new { tags = tags ?? Enumerable.Empty<string>() });
             return response;
         });
     }

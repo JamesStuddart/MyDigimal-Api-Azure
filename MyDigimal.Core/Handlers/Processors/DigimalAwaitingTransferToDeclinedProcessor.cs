@@ -4,6 +4,7 @@ using MyDigimal.Common;
 using MyDigimal.Data;
 using MyDigimal.Core.Models.System;
 using MyDigimal.Core.Models.System.NotificatiosnMetaData;
+using MyDigimal.Core.Serialization;
 using Newtonsoft.Json;
 
 namespace MyDigimal.Core.Handlers.Processors
@@ -14,7 +15,7 @@ namespace MyDigimal.Core.Handlers.Processors
 
         public async Task ProcessAsync(NotificationModel notificationModel)
         {
-            var jsonMetaData = JsonConvert.SerializeObject(notificationModel.MetaData);
+            var jsonMetaData = JsonSerialization.Serialize(notificationModel.MetaData);
             var metaData = JsonConvert.DeserializeObject<DigimalMetaDataModel>(jsonMetaData);
             
             //Transfer digimal to new owner
