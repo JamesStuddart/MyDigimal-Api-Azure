@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyDigimal.Api.Azure.Models;
 using MyDigimal.Api.Azure.Models.Authentication;
-using MyDigimal.Core.Serialization;
 using MyDigimal.Data.Entities;
 using Newtonsoft.Json;
 
@@ -60,6 +59,8 @@ namespace MyDigimal.Api.Azure.Triggers
                 return req.CreateResponse(HttpStatusCode.NotFound);
             }
 
+            var providerKey = string.Empty; // TODO: get provider key from token 
+
             var user = await unitOfWork.Users.GetByEmailAddressAsync(request.Email);
 
             if (user == null)
@@ -73,6 +74,12 @@ namespace MyDigimal.Api.Azure.Triggers
                 {
                     Platform = request.Platform,
                     UserId = user.Id
+                });
+                
+                await unitOfWork.UserExternalAuth.InsertAsync(new UserExternalAuthEntity
+                {
+                    UserId = user.Id,
+                    ProviderKey = providerKey,
                 });
 
                 await unitOfWork.CommitAsync();

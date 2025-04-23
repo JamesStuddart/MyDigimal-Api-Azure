@@ -56,6 +56,9 @@ namespace MyDigimal.Data
 
         public UserAuthPlatformRepository UserAuthPlatforms =>
             GetRepository(() => new UserAuthPlatformRepository(_context, _encryptor));
+        
+        public UserExternalAuthRepository UserExternalAuth =>
+            GetRepository(() => new UserExternalAuthRepository(_context, _encryptor));
 
         public NewsRepository News => GetRepository(() => new NewsRepository(_context, _encryptor));
 

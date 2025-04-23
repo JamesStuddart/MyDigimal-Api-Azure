@@ -19,6 +19,7 @@ namespace MyDigimal.Data
         public CreatureEventsRepository CreatureEvents { get; }
         public UsersRepository Users { get; }
         public UserAuthPlatformRepository UserAuthPlatforms { get; }
+        public UserExternalAuthRepository UserExternalAuth { get; }
         public NewsRepository News { get; }
         public NotificationsRepository Notifications { get; }
         public ReportingLogEntryRepository ReportingLogEntries { get; }

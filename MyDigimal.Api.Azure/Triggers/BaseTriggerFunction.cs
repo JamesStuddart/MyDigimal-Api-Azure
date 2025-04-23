@@ -39,6 +39,23 @@ public abstract class BaseTriggerFunction(
         await unitOfWork.AbortAsync();
         return user;
     }
+    
+    private async Task<UserEntity?> GetUserByProviderKeyAsync(string providerKey)
+    {
+        UserEntity? user = null;
+        
+        //get this role from the user
+        var userId = await unitOfWork.UserExternalAuth.GetByProviderKeyAsync(providerKey);
+
+        if (userId != null && userId != Guid.Empty)
+        {
+            user = await unitOfWork.Users.GetByIdAsync(userId);
+        }
+        
+        await unitOfWork.AbortAsync();
+        
+        return user;
+    }
 
     protected async Task<Guid> GetUserId(HttpRequestData req)
     {
@@ -58,44 +75,43 @@ public abstract class BaseTriggerFunction(
     private async Task<ClaimsPrincipal> ValidateTokenAsync(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(Auth0Settings.ActionSecret ?? string.Empty);
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
             $"{Auth0Settings.AuthorityEndpoint}.well-known/openid-configuration",
             new OpenIdConnectConfigurationRetriever());
-        var config = await configManager.GetConfigurationAsync();
 
+        var config = await configManager.GetConfigurationAsync();
+        Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidIssuer = Auth0Settings.Issuer ?? string.Empty,
             ValidateAudience = true,
             ValidAudience = Auth0Settings.Audience ?? string.Empty,
-            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = config.SigningKeys
         };
-
+        
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
 
         if (validatedToken == null)
         {
             return null;
         }
-        
-        var email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-        if (string.IsNullOrEmpty(email))
+        var providerKey = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(providerKey))
         {
             throw new SecurityTokenException("Invalid token");
         }
-
-        var user = await GetUserAsync(email);
+        
+        var user = await GetUserByProviderKeyAsync(providerKey);
         if (user == null)
         {
             throw new SecurityTokenException("User role not found");
         }
-
+        
         var identity = new ClaimsIdentity(principal.Identity);
         identity.AddClaim(new Claim("custom:user_id", user.Id.ToString()));
         identity.AddClaim(new Claim(ClaimTypes.Role, ((int)user.Role).ToString()));
