@@ -25,7 +25,7 @@ public class ReferenceDataTrigger (
     
     [Function("GetCreatureReferenceData")]
     public async Task<HttpResponseData> GetCreatureReferenceData(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "ref/creature")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ref/creature")] HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
         {
@@ -44,7 +44,7 @@ public class ReferenceDataTrigger (
 
     [Function("GetAuthenticationReferenceData")]
     public async Task<HttpResponseData> GetAuthenticationReferenceData(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "ref/authentication")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ref/authentication")] HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
         {

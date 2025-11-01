@@ -24,7 +24,7 @@ public class TagsTrigger (
 {
     [Function("GetUserTags")]
     public async Task<HttpResponseData> GetUserTags(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "tags")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "tags")] HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
         {

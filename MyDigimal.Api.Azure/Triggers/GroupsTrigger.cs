@@ -21,7 +21,7 @@ public class GroupsTrigger(
 {
     [Function("GetGroups")]
     public async Task<HttpResponseData> GetGroups(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "groups")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "groups")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async (_) =>
@@ -41,7 +41,7 @@ public class GroupsTrigger(
 
     [Function("CreateGroup")]
     public async Task<HttpResponseData> CreateGroup(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "groups/{groupName}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "groups/{groupName}")]
         HttpRequestData req, string groupName)
     {
         return await ValidateUserRequestAsync<object>(req, async (_) =>
@@ -80,7 +80,7 @@ public class GroupsTrigger(
 
     [Function("DeleteGroup")]
     public async Task<HttpResponseData> DeleteGroup(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "groups/{groupName}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "groups/{groupName}")]
         HttpRequestData req, string groupName)
     {
         return await ValidateUserRequestAsync<object>(req, async (_) =>

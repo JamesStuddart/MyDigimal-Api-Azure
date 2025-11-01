@@ -26,7 +26,7 @@ namespace MyDigimal.Api.Azure.Triggers
     {
         [Function("GetCreatures")]
         public async Task<HttpResponseData> GetCreatures(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "creature")]
             HttpRequestData req)
         {
             return await ValidateUserRequestAsync<object>(req, async (_) =>
@@ -43,7 +43,7 @@ namespace MyDigimal.Api.Azure.Triggers
 
         [Function("GetCreatureByShortCode")]
         public async Task<HttpResponseData> GetCreatureByShortCode(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature/sc/{shortCode}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "creature/sc/{shortCode}")]
             HttpRequestData req, string shortCode)
         {
             return await ValidatePublicRequestAsync<object>(req, async (_) =>
@@ -59,7 +59,7 @@ namespace MyDigimal.Api.Azure.Triggers
 
         [Function("GetCreature")]
         public async Task<HttpResponseData> GetCreature(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature/{id}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "creature/{id}")]
             HttpRequestData req, Guid id)
         {
             return await ValidateUserRequestAsync<object>(req, async (_) =>
@@ -81,7 +81,7 @@ namespace MyDigimal.Api.Azure.Triggers
 
         [Function("CreateCreature")]
         public async Task<HttpResponseData> CreateCreature(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "creatures")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "creatures")]
             HttpRequestData req)
         {
             return await ValidateUserRequestAsync<object>(req, async (_) =>
@@ -138,14 +138,11 @@ namespace MyDigimal.Api.Azure.Triggers
 
         [Function("UpdateCreature")]
         public async Task<HttpResponseData> UpdateCreature(
-            [HttpTrigger(AuthorizationLevel.Function, "put", Route = "creature/{id}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "creature/{id}")]
             HttpRequestData req, Guid id)
         {
-            return await ValidateUserRequestAsync<object>(req, async (_) =>
+            return await ValidateUserRequestAsync<CreatureViewModel>(req, async creature =>
             {
-                var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                var creature = JsonConvert.DeserializeObject<CreatureViewModel>(requestBody);
-
                 if (!creature.Id.HasValue || id != creature.Id || !creature.IsValid)
                     return req.CreateResponse(HttpStatusCode.BadRequest);
 
@@ -171,7 +168,7 @@ namespace MyDigimal.Api.Azure.Triggers
 
         [Function("DeleteCreature")]
         public async Task<HttpResponseData> DeleteCreature(
-            [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "creature/{id}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "creature/{id}")]
             HttpRequestData req, Guid id)
         {
             return await ValidateUserRequestAsync<object>(req, async (_) =>

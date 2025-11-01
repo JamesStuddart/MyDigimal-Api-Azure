@@ -29,7 +29,7 @@ namespace MyDigimal.Api.Azure.Triggers
         /// </summary>
         [Function("IsAuthed")]
         public async Task<HttpResponseData> IsAuthed(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "auth")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "auth")]
             HttpRequestData req)
         {
             return await ValidateUserRequestAsync<object>(req,
@@ -42,7 +42,7 @@ namespace MyDigimal.Api.Azure.Triggers
         /// </summary>
         [Function("Register")]
         public async Task<HttpResponseData> Register(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "auth/register")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/register")]
             HttpRequestData req)
         {
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -97,7 +97,7 @@ namespace MyDigimal.Api.Azure.Triggers
         /// </summary>
         [Function("GetUserDetails")]
         public async Task<HttpResponseData> GetDetails(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "auth/details")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "auth/details")]
             HttpRequestData req)
         {
             return await ValidateUserRequestAsync<UserViewModel>(req, async (request) =>

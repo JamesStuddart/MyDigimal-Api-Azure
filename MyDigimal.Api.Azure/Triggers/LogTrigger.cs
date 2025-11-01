@@ -25,10 +25,10 @@ public class LogTrigger(
 {
     [Function("CreateLogEntry")]
     public async Task<HttpResponseData> CreateLogEntry(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "creature/{id}/log")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "creature/{id}/log")]
         HttpRequestData req, Guid id)
     {
-        return await ValidateUserRequestAsync<IEnumerable<LogEntryEntity>>(req, async logs =>
+        return await ValidateUserRequestAsync<LogEntriesViewModel>(req, async logEntries =>
         {
             var userId = await GetUserId(req);
             var correlationId = Guid.NewGuid();
@@ -39,6 +39,15 @@ public class LogTrigger(
 
             var linkEntryIds = (await unitOfWork.LogSchemaEntries
                 .GetCreatureLinkEntriesAsync(creature.LogSchemaId)).Select(x => x.Id).ToList();
+
+            var logs = logEntries.Entries.Select(x => new LogEntryEntity
+            {
+                CreatureId = x.CreatureId,
+                LogSchemaEntryId = x.LogSchemaEntryId,
+                Date = x.Date,
+                Notes = x.Notes,
+                Value = x.Value,
+            });
 
             var inserted = new List<LogEntryEntity>();
 
@@ -59,7 +68,7 @@ public class LogTrigger(
 
             await unitOfWork.CommitAsync();
 
-            var linkedId = logs.FirstOrDefault(x => linkEntryIds.Contains(x.LogSchemaEntryId))?.Value;
+            var linkedId = logEntries.Entries.FirstOrDefault(x => linkEntryIds.Contains(x.LogSchemaEntryId))?.Value;
             if (!string.IsNullOrEmpty(linkedId))
             {
                 foreach (var entry in logs)
@@ -85,10 +94,10 @@ public class LogTrigger(
             return req.CreateResponse(HttpStatusCode.Accepted);
         });
     }
-
+    
     [Function("DuplicateLogEntry")]
     public async Task<HttpResponseData> DuplicateLogEntry(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "creature/{id}/log/duplicate/{entryId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "creature/{id}/log/duplicate/{entryId}")]
         HttpRequestData req, Guid id, Guid entryId)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -146,7 +155,7 @@ public class LogTrigger(
 
     [Function("GetLogEntry")]
     public async Task<HttpResponseData> GetLogEntry(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature/{id}/log/-/{fromYear}/{toYear}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "creature/{id}/log/-/{fromYear}/{toYear}")]
         HttpRequestData req,
         Guid id, int fromYear, int toYear)
     {
@@ -156,7 +165,7 @@ public class LogTrigger(
 
     [Function("GetUserLogs")]
     public async Task<HttpResponseData> GetUserLogs(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature/-/log/-/{fromYear}/{toYear}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "creature/-/log/-/{fromYear}/{toYear}")]
         HttpRequestData req,
         int fromYear, int toYear)
     {
@@ -166,7 +175,7 @@ public class LogTrigger(
 
     [Function("GetSpecificLog")]
     public async Task<HttpResponseData> GetSpecificLog(
-        [HttpTrigger(AuthorizationLevel.Function, "get",
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get",
             Route = "creature/{id}/log/{logSchemaEntryId}/{fromYear}/{toYear}")]
         HttpRequestData req,
         Guid id, Guid logSchemaEntryId, int fromYear, int toYear)
@@ -177,7 +186,7 @@ public class LogTrigger(
 
     [Function("DeleteLogEntry")]
     public async Task<HttpResponseData> DeleteLogEntry(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "creature/{id}/log/{entryId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "creature/{id}/log/{entryId}")]
         HttpRequestData req,
         Guid id, Guid entryId)
     {

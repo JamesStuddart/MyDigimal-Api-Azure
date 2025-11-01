@@ -25,7 +25,7 @@ public class UserTrigger(
 {
     [Function("GetAllUsers")]
     public async Task<HttpResponseData> GetAllUsers(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "user")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "user")]
         HttpRequestData req)
     {
         return await ValidateAdminRequestAsync<object>(req, async _ =>
@@ -55,7 +55,7 @@ public class UserTrigger(
 
     [Function("DisableAccount")]
     public async Task<HttpResponseData> DisableAccount(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "user")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "user")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>

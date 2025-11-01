@@ -24,7 +24,7 @@ public class NotificationsTrigger(
 {
     [Function("GetUserNotifications")]
     public async Task<HttpResponseData> GetUserNotifications(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "notification")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "notification")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -41,7 +41,7 @@ public class NotificationsTrigger(
 
     [Function("MarkNotificationAsRead")]
     public async Task<HttpResponseData> MarkNotificationAsRead(
-        [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "notification/{id}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "notification/{id}")]
         HttpRequestData req, Guid id)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -63,7 +63,7 @@ public class NotificationsTrigger(
 
     [Function("ProcessNotification")]
     public async Task<HttpResponseData> ProcessNotification(
-        [HttpTrigger(AuthorizationLevel.Function, "put", Route = "notification/{id}/{processType}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "notification/{id}/{processType}")]
         HttpRequestData req, Guid id, string processType)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>

@@ -25,7 +25,7 @@ public class SchemaTrigger(
 {
     [Function("GetSchemas")]
     public async Task<HttpResponseData> GetSchemas(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "schema")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "schema")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -45,7 +45,7 @@ public class SchemaTrigger(
 
     [Function("GetSchemaById")]
     public async Task<HttpResponseData> GetSchemaById(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "schema/{id}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "schema/{id}")]
         HttpRequestData req, Guid id)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -72,7 +72,7 @@ public class SchemaTrigger(
 
     [Function("GetSchemaByIdAndCreature")]
     public async Task<HttpResponseData> GetSchemaByIdAndCreature(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "schema/{id}/creature/{creatureId}")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "schema/{id}/creature/{creatureId}")]
         HttpRequestData req, Guid id, Guid creatureId)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -99,7 +99,7 @@ public class SchemaTrigger(
     
     [Function("GetSchemaByCreatureId")]
     public async Task<HttpResponseData> GetSchemaByCreatureId(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "creature/{creatureId}/schema")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "creature/{creatureId}/schema")]
         HttpRequestData req, Guid creatureId)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>
@@ -132,7 +132,7 @@ public class SchemaTrigger(
 
     [Function("GetGeneticsSchemaById")]
     public async Task<HttpResponseData> GetGeneticsSchemaById(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "schema/{id}/genetics")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "schema/{id}/genetics")]
         HttpRequestData req, Guid id)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>

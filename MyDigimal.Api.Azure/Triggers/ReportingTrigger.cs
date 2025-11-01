@@ -25,7 +25,7 @@ public class ReportingTrigger(
 {
     [Function("GetDueFeeds")]
     public async Task<HttpResponseData> GetDueFeeds(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "reporting/feeds/due")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "reporting/feeds/due")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async _ =>

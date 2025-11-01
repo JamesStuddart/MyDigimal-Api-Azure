@@ -19,7 +19,7 @@ public class ExampleTrigger(
 {
     // [Function("PublicEndpoint")]
     public async Task<HttpResponseData> PublicEndpoint(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "public")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "public")]
         HttpRequestData req)
     {
         return await ValidatePublicRequestAsync<object>(req, async (x) => req.CreateResponse());
@@ -27,7 +27,7 @@ public class ExampleTrigger(
 
     // [Function("UserEndpoint")]
     public async Task<HttpResponseData> UserEndpoint(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "user")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "user")]
         HttpRequestData req)
     {
         return await ValidateUserRequestAsync<object>(req, async (x) => req.CreateResponse());
@@ -35,7 +35,7 @@ public class ExampleTrigger(
 
     // [Function("AdminEndpoint")]
     public async Task<HttpResponseData> AdminEndpoint(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "admin")]
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin")]
         HttpRequestData req)
     {
         return await ValidateAdminRequestAsync<object>(req, async (x) => req.CreateResponse());

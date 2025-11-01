@@ -23,7 +23,7 @@ public class NewsTrigger (IConfiguration configuration,
     
         [Function("GetLatestNews")]
         public async Task<HttpResponseData> GetLatestNews(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "newsfeed")] HttpRequestData req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "newsfeed")] HttpRequestData req)
         {
             var news = await unitOfWork.News.GetTopAsync();
             await unitOfWork.AbortAsync();
@@ -35,7 +35,7 @@ public class NewsTrigger (IConfiguration configuration,
 
         [Function("InsertNews")]
         public async Task<HttpResponseData> InsertNews(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "newsfeed")] HttpRequestData req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "newsfeed")] HttpRequestData req)
         {
             return await ValidateAdminRequestAsync<NewsEntity>(req, async (news) =>
             {
@@ -57,7 +57,7 @@ public class NewsTrigger (IConfiguration configuration,
 
         [Function("DeleteNews")]
         public async Task<HttpResponseData> DeleteNews(
-            [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "newsfeed")] HttpRequestData req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "newsfeed")] HttpRequestData req)
         {
             return await ValidateAdminRequestAsync<object>(req, async (_) =>
             {
